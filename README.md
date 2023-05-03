@@ -7,4 +7,6 @@ The output being aimed for: a set of labeled nodes and connections describing wh
 
 The result: something like this diagram, from the Kalundborg Symbiosis in Denmark (https://www.symbiosis.dk/en/). Folks there understood the importance of what they were building a long time ago, but the information they had has failed to get to many places it needed to go. 
 
+![Industrial Symbiosis](https://github.com/terranexum/OpenQGO/blob/main/Technology-Co-Location-Symbiosis.png)
+
 When you want zero waste and maximum use of the available energy for growth, living things are kind of a good place to look to for basing designs on. Most have evolved circulatory systems as well, once they are large and complex enough that free diffusion-based systems become too inefficient.
