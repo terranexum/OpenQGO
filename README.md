@@ -1,6 +1,8 @@
 # OpenQGO
 A generalized, open-source version of our Quantum Global Optimizer platform to solve the problem of getting anything where it needs to go.
 
+If the following work is of value to you, please consider supporting our work or joining as a Core Contributor through [Open Collective](https://opencollective.com/terranexum/projects/openqgo).
+
 ## Project Scope
 ![TerraNexum - Business Flow Model - OpenQGO](https://github.com/terranexum/OpenQGO/assets/20586685/41712ee2-b33e-4acd-919c-6f98f8609e0b)
 
