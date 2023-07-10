@@ -1,20 +1,18 @@
-# OpenQGO
-A generalized, open-source version of our Quantum Global Optimizer platform to solve the problem of getting anything where it needs to go.
+# **OpenQGO**
 
-If the following work is of value to you, please consider supporting our work or joining as a Core Contributor through [Open Collective](https://opencollective.com/terranexum/projects/openqgo).
+Contributions made by Anish Jahagirdar of Lakewood High School for TerraNexum.
 
-## Project Scope
-![TerraNexum - Business Flow Model - OpenQGO](https://github.com/terranexum/OpenQGO/assets/20586685/41712ee2-b33e-4acd-919c-6f98f8609e0b)
+## About TerraNexum
 
-## Overview
+TerraNexum is a company located in Evergreen, Colorado  focused on combatting environmental sustainability issues throughout the world. They host many sustainability projects including researching and developing carbon capture hardware, energy technologies(solar canopies, batteries, etc), and the use of quantum computing to solve complex optimization problems that can lead to better energy and sustainability planning.
 
-The OpenQGO project aims to open-source some of our previous work behind our Quantum Global Optimizer (at https://qgo-dev.terranexum.com) and modify it to create a general engine, able to use quantum optimization if the problem size is large enough, to identify locations where technologies can be co-located based on their inputs and outputs to optimize a metric defined using those inputs and outputs.
+## My Responsibilities
 
-The output being aimed for: a set of labeled nodes and connections describing what technologies should go where, given an initial state (today) and a final desired state (tomorrow). OpenQGO will calculate the pipes needed to optimize the flows of these inputs and outputs over time to reach the goal. These are pipes in time, not in space; on the ground, all we will see are appearances of new projects using co-located technologies, and where they should be.  Projects that fail to materialize for whatever reason are fine - the optimization problem gets recalculated to find the next best solution with the most up-to-date information. 
+At TerraNexum, my main responsibilities were related to the OpenQGO(Global Quantum Optimizer) project which seeks to provide users with a global map interface that has data layers that the user can toggle on and off in order to tell the optimization algorithm what features to take into consideration when optimizing for maximum and efficient energy flow. This product could be used to see how renewable energy sources should replace fossil fuels over time in the most efficient manner by providing the best results to businesses and homes and minimizing environmental damage. 
 
-The result: something like this diagram, from the Kalundborg Symbiosis in Denmark (https://www.symbiosis.dk/en/). Folks there understood the importance of what they were building a long time ago, but the information they had has failed to get to many places it needed to go. 
+## Challenges and Successes
 
-![Industrial Symbiosis](https://github.com/terranexum/OpenQGO/blob/main/Technology-Co-Location-Symbiosis.png)
+During the development processes, there were a fair share of challenges that had to be dealt with. The project primarily uses QAOA(Quantum Approximate Optimization Algorithm), a specific algorithm to quantum that attempts to minimize the Hamiltonian(think energy cost of a solution for quantum). Originally, the Microsoft Quantum language Q# was researched to see if QAOA could be implemented there but it was quickly realized that there was not sufficient documentation on the programming language to make it easy to learn from scratch. After this, Python was adopted as the primary language behind QGO and it streamlined the process as there were many quantum libraries available to pull code from. 
 
-When you want zero waste and maximum use of the available energy for growth, living things are kind of a good place to look to for basing designs on. Most have evolved circulatory systems as well, once they are large and complex enough that free diffusion-based systems become too inefficient.
+Another challenge was the actual implementation of QAOA itself. The steps of the project included locating two GeoJSON files(files that have points on a map e.g. schools in the U.S.), capturing one feature to link the two files by, and then optimizing for that. 
 
