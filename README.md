@@ -6,6 +6,8 @@ Contributions made by Anish Jahagirdar of Lakewood High School for TerraNexum.
 
 TerraNexum is a company located in Evergreen, Colorado  focused on combatting environmental sustainability issues throughout the world. They host many sustainability projects including researching and developing carbon capture hardware, energy technologies(solar canopies, batteries, etc), and the use of quantum computing to solve complex optimization problems that can lead to better energy and sustainability planning.
 
+![TN Logo](https://media.licdn.com/dms/image/D560BAQEHjvadbsgQvQ/company-logo_200_200/0/1688195130686?e=2147483647&v=beta&t=Lc05yWlBt-qerpFeBYdWTH70P2uuJvdV396e_Nn0iXg)
+
 ## My Responsibilities
 
 At TerraNexum, my main responsibilities were related to the OpenQGO(Global Quantum Optimizer) project which seeks to provide users with a global map interface that has data layers that the user can toggle on and off in order to tell the optimization algorithm what features to take into consideration when optimizing for maximum and efficient energy flow. This product could be used to see how renewable energy sources should replace fossil fuels over time in the most efficient manner by providing the best results to businesses and homes and minimizing environmental damage. 
