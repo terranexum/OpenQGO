@@ -35,3 +35,8 @@ As of now, my future career and academic plans have stayed the same as they were
 ## Thank You!
 
 Dahl Winters was my mentor at TerraNexum and she was the greatest mentor that I think I could have had for an internship like this. Dahl was extremely willing to cater to me and let me choose the work that I was interested in doing and learn in. She was also very open with me about the business side of TerraNexum and that provided so much value to me seeing the inner workings of a business like this. She provided me with access to cloud computing platforms, projects and challenges I didn't know existed, and connections that will be very useful in my future when dealing with sustainability problems. I would like to thank Dahl for establishing even more interest in this field than I had before the internship and I definitely owe her a lot in the future for giving me this opportunity. Thank you Dahl!
+
+## The Process
+
+![Colorado Electric Utilities Service Territories][https://energyoffice.colorado.gov/sites/energyoffice/files/styles/image_card/public/11-2019/colorado_electric_utility_service_territories_map_0_0.png.webp] 
+
