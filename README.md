@@ -38,5 +38,5 @@ Dahl Winters was my mentor at TerraNexum and she was the greatest mentor that I 
 
 ## The Process
 
-![Colorado Electric Utilities Service Territories][https://energyoffice.colorado.gov/sites/energyoffice/files/styles/image_card/public/11-2019/colorado_electric_utility_service_territories_map_0_0.png.webp] 
+![Colorado Service Utilities Servicing](Colorado Electric Utilities Service Territories][https://energyoffice.colorado.gov/sites/energyoffice/files/styles/image_card/public/11-2019/colorado_electric_utility_service_territories_map_0_0.png.webp)
 
