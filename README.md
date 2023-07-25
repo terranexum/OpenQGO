@@ -38,5 +38,5 @@ Dahl Winters was my mentor at TerraNexum and she was the greatest mentor that I 
 
 ## The Process
 
-![Colorado Service Utilities Servicing](https://www.cleancooperative.com/uploads/7/4/9/8/7498381/uncooperative-map_orig.png)
+![Colorado Service Utilities Servicing](https://drive.google.com/uc?export=download&id=1IgJTXIJn_QAsr7vs9vlDAc7qrZ6SRUaJ)
 
