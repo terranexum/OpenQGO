@@ -84,6 +84,8 @@ from qiskit_optimization.algorithms import CplexOptimizer
 
 pyp.rcParams["figure.figsize"] = (20, 20)
 
+from QGONexum import QAOANode, QGOProblem, QGOGraph, QGOOptimizer
+
 links = ["mineral_production_facilities.geojson"]
 
 links.append("mineral_sources.geojson")
@@ -107,4 +109,6 @@ ccc_optimize.optimize(problem=ccc_problem, QGOGraph=ccc_graph)
 
 sol_graph = ccc_optimize.createSolutionGraph(ccc_problem, ccc_graph)
 
-nx.write_edgelist(sol_graph, "edgelist.json")
+nx.write_edgelist(sol_graph, "/home/OpenQGO/edgelist.json")
+
+nx.write_shp(sol_graph, "/home/OpenQGO/shapefiles")
