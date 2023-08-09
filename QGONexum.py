@@ -1,71 +1,71 @@
-import pandas
-import pyogrio 
-import requests
+#import pandas
+#import pyogrio 
+#import requests
 
-import folium
-import fiona 
+#import folium
+#import fiona 
 
-import openqaoa
+#import openqaoa
 
 import networkx as nx
-import pyproj
-import rtree
-import shapely
-import geojson
-import matplotlib as mpl
+#import pyproj
+#import rtree
+#import shapely
+#import geojson
+#import matplotlib as mpl
 import matplotlib.pyplot as pyp
 import geopandas as gpd
-import geodatasets
-import dimod
+#import geodatasets
+#import dimod
 
-import libpysal
-from libpysal import weights
+#import libpysal
+#from libpysal import weights
 
 import numpy as np
-import sklearn
+#import sklearn
 
 from sklearn.metrics import pairwise_distances
 
 
 
-import numpy as np
+#import numpy as np
 import numpy.random as random
 
-import more_itertools
+#import more_itertools
 
     
 import cplex
-import sympy as sp
+#import sympy as sp
 
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 
-from math import acos
+#from math import acos
 
 # Printing configuration
 from sympy.interactive import printing
 printing.init_printing(use_latex=True)
-from IPython.display import display, Markdown
+#from IPython.display import display, Markdown
 
 
-from openqaoa.problems import MaximumCut, NumberPartition, MinimumVertexCover, QUBO
-from openqaoa.utilities import plot_graph, ground_state_hamiltonian
-from openqaoa.qaoa_components import Hamiltonian
+#from openqaoa.problems import MaximumCut, NumberPartition, MinimumVertexCover, QUBO
+#from openqaoa.utilities import plot_graph, ground_state_hamiltonian
+#from openqaoa.qaoa_components import Hamiltonian
 
 
 #import the QAOA workflow model
 from openqaoa import QAOA
 
 #import method to specify the device
-from openqaoa.backends import create_device
+#from openqaoa.backends import create_device
 
-import more_itertools
+#import more_itertools
 
 #rom qiskit import Aer, execute, QuantumCircuit
-from docplex.mp.model import Model
+#from docplex.mp.model import Model
 from docplex.mp.model_reader import ModelReader
 
-from qiskit_optimization import QuadraticProgram
-from qiskit_optimization.algorithms import CplexOptimizer
+#from qiskit_optimization import QuadraticProgram
+#from qiskit_optimization.algorithms import CplexOptimizer
 from qiskit_optimization.translators import from_docplex_mp
 
 from qiskit_optimization.converters import (
@@ -77,11 +77,11 @@ from qiskit_optimization.converters import (
 
 
 from qiskit_optimization.algorithms.admm_optimizer import ADMMParameters, ADMMOptimizer
-from qiskit.algorithms.minimum_eigensolvers import QAOA, NumPyMinimumEigensolver
+from qiskit.algorithms.minimum_eigensolvers import QAOA # NumPyMinimumEigensolver
 from qiskit.algorithms.optimizers import COBYLA
 from qiskit.primitives import Sampler
 from qiskit_optimization.algorithms import CobylaOptimizer, MinimumEigenOptimizer
-from qiskit_optimization.algorithms import CplexOptimizer
+#from qiskit_optimization.algorithms import CplexOptimizer
 
 
 def getEdgeNames(edge_list):
@@ -141,7 +141,7 @@ def normalizeEdgeCapacities(edge_capacities):
     
     
     min_val = np.min(np.array(list(edge_capacities.values())))
-    max_val = np.max(np.array(list(pp_city_edge_capacities.values())))
+    max_val = np.max(np.array(list(edge_capacities.values())))
     
     capacity_range = max_val - min_val
     
@@ -161,6 +161,7 @@ class QAOANode:
 
     def __init__(self, point, name):
         self.point = point
+        self.coordinates = ()
         try:
             self.coordinates = (point["geometry"].x, point["geometry"].y)
         except: 
@@ -168,7 +169,7 @@ class QAOANode:
             
         self.name = name
     
-    def setCoordinates(coordinates):
+    def setCoordinates(self, coordinates):
         
         self.coordinates = coordinates
     
@@ -633,26 +634,28 @@ class QGOOptimizer:
     
     
         #Add Nodes
-        #sol_graph.add_nodes_from(first_ncd)
-        #sol_graph.add_nodes_from(second_ncd)
-        #sol_graph.add_nodes_from(third_ncd)
+        sol_graph.add_nodes_from(first_ncd)
+        sol_graph.add_nodes_from(second_ncd)
+        sol_graph.add_nodes_from(third_ncd)
 
         #Add Edges 
         #sol_graph.add_edges_from(coal_pp_edge_list)
         #sol_graph.add_edges_from(pp_city_edge_list)
+        sol_graph.add_edges_from(graph.edges_lists[0])
+        sol_graph.add_edges_from(graph.edges_lists[1])
 
         #Draw Nodes
-        nx.draw_networkx_nodes(sol_graph, ax=ax, pos=first_ncd, nodelist=first_node_list, node_color="red", node_size=80)
-        nx.draw_networkx_nodes(sol_graph, ax=ax, pos=second_ncd, nodelist=second_node_list, node_color="black", node_size=70)
-        nx.draw_networkx_nodes(sol_graph, ax=ax, pos=third_ncd, nodelist=third_node_list, node_color="blue", node_size=20)
+        #nx.draw_networkx_nodes(sol_graph, ax=ax, pos=first_ncd, nodelist=first_node_list, node_color="red", node_size=80)
+        #nx.draw_networkx_nodes(sol_graph, ax=ax, pos=second_ncd, nodelist=second_node_list, node_color="black", node_size=70)
+        #nx.draw_networkx_nodes(sol_graph, ax=ax, pos=third_ncd, nodelist=third_node_list, node_color="blue", node_size=20)
 
         #Draw Edges
-        nx.draw_networkx_edges(sol_graph, ax=ax, edgelist=graph.edges_lists[0], pos=combineNodeCoords(first_ncd, second_ncd), edge_color='green', width=1, arrowsize=10)
-        nx.draw_networkx_edges(sol_graph, ax=ax, edgelist=graph.edges_lists[1], pos=combineNodeCoords(second_ncd, third_ncd), edge_color='purple', width=1, arrowsize=10)
+        #nx.draw_networkx_edges(sol_graph, ax=ax, edgelist=graph.edges_lists[0], pos=combineNodeCoords(first_ncd, second_ncd), edge_color='green', width=1, arrowsize=10)
+        #nx.draw_networkx_edges(sol_graph, ax=ax, edgelist=graph.edges_lists[1], pos=combineNodeCoords(second_ncd, third_ncd), edge_color='purple', width=1, arrowsize=10)
 
 
-        nx.draw_networkx_edge_labels(sol_graph, ax=ax, pos=combineNodeCoords(first_ncd, second_ncd), edge_labels=sol_edge_list_names, font_size=12)
-        nx.draw_networkx_edge_labels(sol_graph, ax=ax, pos=combineNodeCoords(second_ncd, third_ncd), edge_labels=sol_edge_list_two_names, font_size=12)
+        #nx.draw_networkx_edge_labels(sol_graph, ax=ax, pos=combineNodeCoords(first_ncd, second_ncd), edge_labels=sol_edge_list_names, font_size=12)
+        #nx.draw_networkx_edge_labels(sol_graph, ax=ax, pos=combineNodeCoords(second_ncd, third_ncd), edge_labels=sol_edge_list_two_names, font_size=12)
 
-        pyp.show()
+        #pyp.show()
         return sol_graph
