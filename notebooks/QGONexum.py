@@ -7,7 +7,8 @@
 
 #import openqaoa
 
-import networkx as nx
+#import networkx as nx
+import geonetworkx as gnx
 #import pyproj
 #import rtree
 #import shapely
@@ -294,7 +295,8 @@ class QGOGraph:
 
     edges_labels = []
     
-    graph = nx.DiGraph()
+    #graph = nx.DiGraph()
+    graph = gnx.GeoGraph()
     
     def getSquareMatrix(self, old_matrix):
     
@@ -365,6 +367,7 @@ class QGOGraph:
         for edge_list in self.edges_lists:
 
             self.graph.add_edges_from(edge_list)
+
 
     def draw(self):
         

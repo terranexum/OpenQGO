@@ -5,6 +5,7 @@
 #import openqaoa
 
 import networkx as nx
+#import geonetworkx as gnx
 #import pyproj
 #import rtree
 #import shapely
@@ -84,31 +85,38 @@ printing.init_printing(use_latex=True)
 
 pyp.rcParams["figure.figsize"] = (20, 20)
 
-from QGONexum import QAOANode, QGOProblem, QGOGraph, QGOOptimizer
+from src.QGONexum import QGOProblem, QGOGraph, QGOOptimizer
+from src.QGOOut import QGOExporter
 
-links = ["/home/OpenQGO/mineral_production_facilities.geojson"]
+# paths to input data in data_in
+links = ["/home/OpenQGO/data_in/mineral_production_facilities.geojson"]
+links.append("/home/OpenQGO/data_in/mineral_sources.geojson")
+links.append("/home/OpenQGO/data_in/possible_solar.geojson")
 
-links.append("/home/OpenQGO/mineral_sources.geojson")
-links.append("/home/OpenQGO/possible_solar.geojson")
-
+# forming the QGOProblem using QAOA
 cutoffs = [5, 5, 10]
-
 prefixes = ["possible_solar", "powerplants", "high_schools"]
-
 ccc_problem = QGOProblem(links, prefixes, cutoffs)
 
+# generating the graph network represented by the three input data files
 thresholds = [3, 10]
-
 ccc_graph = QGOGraph(ccc_problem, thresholds)
-
 ccc_graph.createGraph()
 ccc_graph.draw()
 
+# optimizing the graph network using QAOA as the problem solver
 ccc_optimize = QGOOptimizer()
 ccc_optimize.optimize(problem=ccc_problem, QGOGraph=ccc_graph)
 
-sol_graph = ccc_optimize.createSolutionGraph(ccc_problem, ccc_graph)
+# getting the solution graph
+ccc_sol_graph = ccc_optimize.createSolutionGraph(ccc_problem, ccc_graph)
+print(ccc_sol_graph)
+# exporting the solution graph as a GeoJSON for UI display
+exporter = QGOExporter(ccc_problem, ccc_graph, ccc_sol_graph)
 
-nx.write_edgelist(sol_graph, "/home/OpenQGO/edgelist.json")
+#nx.write_edgelist(sol_graph, "/home/OpenQGO/edgelist.json")
 
-nx.write_shp(sol_graph, "/home/OpenQGO/shapefiles")
+#nx.write_shp(sol_graph, "/home/OpenQGO/shapefiles")
+
+#g.name = "solution_graph"
+#gnx.write_geofile(g, "/home/OpenQGO/shapefiles/", driver="GeoJSON")
