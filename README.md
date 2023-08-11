@@ -1,6 +1,10 @@
 # **OpenQGO**
 
+A live public demo is available at https://studio.foursquare.com/public/23ac96cc-cb35-4168-9c9b-926ad7eaa272. 
+
 Contributions made by Anish Jahagirdar of Lakewood High School for TerraNexum.
+
+![OpenQGO Demo for the Jefferson County, KY area](https://github.com/terranexum/OpenQGO/blob/dahl-dev/images/OpenQGO_demo_KY.png)
 
 ## About TerraNexum
 
@@ -37,10 +41,4 @@ Dahl Winters was my mentor at TerraNexum and she was the greatest mentor that I 
 ## The Process
 
 ![Colorado Service Utilities Servicing](https://drive.google.com/uc?export=download&id=1IgJTXIJn_QAsr7vs9vlDAc7qrZ6SRUaJ)
-
-## Demo Output
-
-A live public demo is available at https://studio.foursquare.com/public/23ac96cc-cb35-4168-9c9b-926ad7eaa272. 
-
-![OpenQGO Demo for the Jefferson County, KY area](image.png)
 
