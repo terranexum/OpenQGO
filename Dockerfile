@@ -292,13 +292,14 @@ RUN pip install more-itertools
 
 RUN pip install GDAL==3.8.0
 
-WORKDIR /home/OpenQGO/
-COPY /* /home/OpenQGO/
+RUN apt-get install -y vim
 
-VOLUME /home/OpenQGO/data_out
+WORKDIR /home/OpenQGO/
+COPY . /home/OpenQGO/
 
 #CMD bash
 CMD python src/OpenQGO.py
 
 
 # docker run -it --name openqgo -v /home/OpenQGO/out_shp:/home/OpenQGO/shapefiles tn:openqgo
+# docker run -it --name openqgo -v $(pwd)/data_out:/home/OpenQGO/data_out tn:openqgo /bin/bash

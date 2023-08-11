@@ -174,12 +174,13 @@ class QAOANode:
         self.name = name
     
     def setCoordinates(self, coordinates):
-        
         self.coordinates = coordinates
+
+    def getCoordinates(self):
+        return self.coordinates
     
     def changeName(self, new_name):
         self.name = new_name
-        
         
     def __str__(self):
         return self.name
@@ -353,7 +354,7 @@ class QGOGraph:
     def setEdgeListNames(self):
 
         self.edge_list_names = self.getEdgeNames([*self.all_edge_capacities.keys()])  
-        print(self.edge_list_names)
+        #print(self.edge_list_names)
 
     def createGraph(self):
 
@@ -403,7 +404,7 @@ class QGOGraph:
         self.setAllEdgeCapacities()
         
         self.setEdgeListNames()
-        print(self.edge_list_names)
+        #print(self.edge_list_names)
         
         
 class QGOOptimizer: 

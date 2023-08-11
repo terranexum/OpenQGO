@@ -85,8 +85,8 @@ printing.init_printing(use_latex=True)
 
 pyp.rcParams["figure.figsize"] = (20, 20)
 
-from src.QGONexum import QGOProblem, QGOGraph, QGOOptimizer
-from src.QGOOut import QGOExporter
+from QGONexum import QGOProblem, QGOGraph, QGOOptimizer
+from QGOOut import QGOExporter
 
 # paths to input data in data_in
 links = ["/home/OpenQGO/data_in/mineral_production_facilities.geojson"]
@@ -111,12 +111,6 @@ ccc_optimize.optimize(problem=ccc_problem, QGOGraph=ccc_graph)
 # getting the solution graph
 ccc_sol_graph = ccc_optimize.createSolutionGraph(ccc_problem, ccc_graph)
 print(ccc_sol_graph)
-# exporting the solution graph as a GeoJSON for UI display
+
+# exporting both the problem and solution graphs as GeoJSONs for UI display
 exporter = QGOExporter(ccc_problem, ccc_graph, ccc_sol_graph)
-
-#nx.write_edgelist(sol_graph, "/home/OpenQGO/edgelist.json")
-
-#nx.write_shp(sol_graph, "/home/OpenQGO/shapefiles")
-
-#g.name = "solution_graph"
-#gnx.write_geofile(g, "/home/OpenQGO/shapefiles/", driver="GeoJSON")
