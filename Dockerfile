@@ -258,10 +258,7 @@ COPY --from=builder  /build_gdal_version_changing/usr/ /usr/
 
 RUN ldconfig
 
-WORKDIR /home/OpenQGO/
-ADD ./* /home/OpenQGO/
-
-RUN apt-get update && apt-get install -y python3-pip
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y python3-pip 
 
 RUN pip install openqaoa    
 RUN pip install pandas
@@ -293,6 +290,16 @@ RUN pip install scikit-learn
 RUN pip install qiskit[optimization]
 RUN pip install more-itertools
 
+RUN pip install GDAL==3.8.0
+
+RUN apt-get install -y vim
+
+WORKDIR /home/OpenQGO/
+COPY . /home/OpenQGO/
 
 #CMD bash
-CMD python OpenQGO.py
+CMD python src/OpenQGO.py
+
+
+# docker run -it --name openqgo -v /home/OpenQGO/out_shp:/home/OpenQGO/shapefiles tn:openqgo
+# docker run -it --name openqgo -v $(pwd)/data_out:/home/OpenQGO/data_out tn:openqgo /bin/bash
