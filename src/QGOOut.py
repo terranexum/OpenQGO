@@ -1,13 +1,23 @@
+from pathlib import Path
+from typing import Union
+
 import pandas as pd
 import geopandas as gpd
 import shapely
 
+import networkx as nx
+from networkx.classes.reportviews import NodeView, OutEdgeView
 
-class QGOExporter: 
+from QGONexum import QGOProblem, QGOGraph
 
-    def __init__(self, qgo_problem, qgo_graph, qgo_sol_graph):
+DATA_OUT_DIR = Path(__file__).resolve().parent.parent / "data_out"
 
-        self.qgo_graph = qgo_graph.graph
+
+class QGOExporter:
+
+    def __init__(self, qgo_problem: QGOProblem, qgo_graph: QGOGraph, qgo_sol_graph: nx.DiGraph):
+
+        self.qgo_graph: nx.DiGraph = qgo_graph.graph
         self.qgo_sol_graph = qgo_sol_graph
 
         self.files = qgo_problem.files
@@ -30,17 +40,17 @@ class QGOExporter:
                 "sol_edges": sol_edges
                 }
 
-        def retNodeCoords(node_item):
+        def retNodeCoords(node_item: NodeView):
             return node_item.getCoordinates()
         
-        def retEdgeCoords(edge_item):
+        def retEdgeCoords(edge_item: OutEdgeView):
             edge_coord_list = []
             for node in edge_item:
                 print(node)
                 edge_coord_list.append(node.getCoordinates())
             return edge_coord_list
         
-        def retNames(item):
+        def retNames(item: Union[NodeView, OutEdgeView]) -> str:
             return item.__str__()
 
         # List Setup
@@ -65,16 +75,16 @@ class QGOExporter:
         pre_sol_dfs = self.get_pre_dfs(sol_node_list, sol_edge_list)
 
         # Concatenating all the separate dataframes into one big DataFrame
-        single_prob_df = pd.concat(pre_problem_dfs, ignore_index=True).reset_index(drop=True)
-        single_sol_df = pd.concat(pre_sol_dfs, ignore_index=True).reset_index(drop=True)
+        single_prob_df: pd.DataFrame = pd.concat(pre_problem_dfs, ignore_index=True).reset_index(drop=True)
+        single_sol_df: pd.DataFrame = pd.concat(pre_sol_dfs, ignore_index=True).reset_index(drop=True)
 
         # Finally, generating the actual GeoDataFrame that can be manipulated
         geo_prob_df = gpd.GeoDataFrame(single_prob_df, geometry='geometry', crs='epsg:4326')
         geo_sol_df = gpd.GeoDataFrame(single_sol_df, geometry='geometry', crs='epsg:4326')
         
         # Output to file
-        geo_prob_df.to_file('/home/OpenQGO/data_out/QGOprob.geojson', driver='GeoJSON')  
-        geo_sol_df.to_file('/home/OpenQGO/data_out/QGOsol.geojson', driver='GeoJSON')  
+        geo_prob_df.to_file(DATA_OUT_DIR / 'QGOprob.geojson', driver='GeoJSON')  
+        geo_sol_df.to_file(DATA_OUT_DIR / 'QGOsol.geojson', driver='GeoJSON')  
 
     def get_pre_dfs(self, node_list, edge_list):
 

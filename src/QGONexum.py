@@ -309,7 +309,7 @@ class QGOGraph:
 
     edges_labels: list[dict[tuple[QAOANode, QAOANode], str]] = []
     
-    graph = nx.DiGraph()
+    graph: nx.DiGraph = nx.DiGraph()
 
     def __init__(self, qgo_problem: QGOProblem, thresholds: list[int]):
 
@@ -612,7 +612,7 @@ class QGOOptimizer:
         self.solution = admm_quantum.solve(qp)
         return str(self.solution)
     
-    def createSolutionGraph(self, problem, graph):
+    def createSolutionGraph(self, problem, graph) -> nx.DiGraph:
         
         sol_edge_list_names = {}
         sol_edge_list_two_names = {}
