@@ -88,6 +88,34 @@ from qiskit_optimization.algorithms import CobylaOptimizer, MinimumEigenOptimize
 #from qiskit_optimization.algorithms import CplexOptimizer
 
 
+
+class QAOANode:
+
+    neighbors = []
+
+    def __init__(self, point: gpd.GeoSeries, name: str):
+        self.point = point
+        self.coordinates: tuple[float, float] = ()
+        try:
+            self.coordinates = (point["geometry"].x, point["geometry"].y)
+        except: 
+            self.coordinates = (point["geometry"].centroid.x, point["geometry"].centroid.y)
+            
+        self.name = name
+    
+    def setCoordinates(self, coordinates: tuple[float, float]):
+        self.coordinates = coordinates
+
+    def getCoordinates(self) -> tuple[float, float]:
+        return self.coordinates
+    
+    def changeName(self, new_name: str):
+        self.name = new_name
+        
+    def __str__(self):
+        return self.name
+
+
 def getEdgeNames(edge_list):
     
     edge_names = {}
@@ -106,19 +134,30 @@ def tupleToStr(tuple):
     
     return returnStr + ")"
 
-def getEdgesAndCapacities(nodes_1, nodes_2, binaryMatrix, scale_factor):
-    edge_list = []
-    
-    edge_labels = {}
-    edge_capacities = {}
+def getEdgesAndCapacities(
+        nodes_1: list[QAOANode],
+        nodes_2: list[QAOANode],
+        binaryMatrix: np.ndarray,
+        scale_factor: int
+    ) -> tuple[
+        list[tuple[QAOANode, QAOANode]],
+        dict[tuple[QAOANode, QAOANode], float],
+        dict[tuple[QAOANode, QAOANode], str]
+    ]:
+    edge_list: list[tuple[QAOANode, QAOANode]] = []
+
+    edge_labels: dict[tuple[QAOANode, QAOANode], str] = {}
+    edge_capacities: dict[tuple[QAOANode, QAOANode], float] = {}
     
     #for each node in nodes_1, iterate over each node in nodes_2
+    i: QAOANode
     for i in range(len(nodes_1)):
+        j: QAOANode
         for j in range(len(nodes_2)):
             #if these two nodes are within our distance threshold - create edge
             if(binaryMatrix[i, j] > 0):
                 
-                edge = (nodes_1[i], nodes_2[j])
+                edge: tuple[QAOANode, QAOANode] = (nodes_1[i], nodes_2[j])
                 edge_list.append(edge)
                 
                 edge_capacities[edge] = (1 / binaryMatrix[i, j]) * scale_factor
@@ -159,61 +198,43 @@ def combineNodeCoords(node_coords_1, node_coords_2):
     return {**node_coords_1, **node_coords_2}
 
 
-class QAOANode:
-
-    neighbors = []
-
-    def __init__(self, point, name):
-        self.point = point
-        self.coordinates = ()
-        try:
-            self.coordinates = (point["geometry"].x, point["geometry"].y)
-        except: 
-            self.coordinates = (point["geometry"].centroid.x, point["geometry"].centroid.y)
-            
-        self.name = name
-    
-    def setCoordinates(self, coordinates):
-        self.coordinates = coordinates
-
-    def getCoordinates(self):
-        return self.coordinates
-    
-    def changeName(self, new_name):
-        self.name = new_name
-        
-    def __str__(self):
-        return self.name
-
-
 class QGOProblem:
 
     #GeoJSON Files
-    files = []
+    files: list[gpd.GeoDataFrame] = []
 
     #Node Lists for each GeoJSON File
-    nodes_lists = []
+    nodes_lists: list[list[QAOANode]] = []
 
     #Coordinate Lists for each GeoJSON File
-    coords_lists = []
+    coords_lists: list[tuple[float, float]] = []
 
     #Node Coord Dictionaries for each GeoJSON File
-    ncds = []
+    ncds: list[dict[QAOANode, tuple[float, float]]] = []
 
     #Prefixes for the names of nodes for each GeoJSON File
-    prefixes = []
+    prefixes: list[str] = []
 
+    def __init__(self, links: list[str], prefixes: list[str], cutoffs: list[str]):
 
+        self.setFiles(links)
+        self.prefixes = prefixes
+        
+        self.setNodeLists(cutoffs, prefixes)
+        self.setCoordsLists()
+        self.setNodeCoordDictionaries()
     
-    def setFiles(self, links):
+    def setFiles(self, links: list[str]):
 
         for link in links:
-            self.files.append(gpd.read_file(open(link)))
+            with open(link) as f:
+                self.files.append(gpd.read_file(f))
 
-    def getNodes(self, geo_file, prefix, idx_cutoff=np.inf):
+    def getNodes(self, geo_file: gpd.GeoDataFrame, prefix: str, idx_cutoff=np.inf) -> list[QAOANode]:
     
-        node_list = []
+        node_list: list[QAOANode] = []
 
+        row: gpd.GeoSeries
         for idx, row in geo_file.iterrows():
 
             if idx == idx_cutoff: break
@@ -224,19 +245,20 @@ class QGOProblem:
 
         return node_list
     
-    def getNodeCoordDict(self, node_list):
+    def getNodeCoordDict(self, node_list: list[QAOANode]) -> dict[QAOANode, tuple[float, float]]:
         
         node_coord_dict = {}
 
+        node: QAOANode
         for node in node_list:
 
             node_coord_dict[node] = node.coordinates
 
         return node_coord_dict
 
-    def getCoordList(self, node_list):
+    def getCoordList(self, node_list: list[QAOANode]) -> list[tuple[float, float]]:
     
-        node_coords = []
+        node_coords: list[tuple[float, float]] = []
 
         for node in node_list:
             node_coords.append(node.coordinates)
@@ -256,7 +278,7 @@ class QGOProblem:
             node.changeName(prefix + " " + str(idx))
         
     
-    def setNodeLists(self, cutoffs, prefixes):
+    def setNodeLists(self, cutoffs: list[str], prefixes: list[str]):
         
         for i, file in enumerate(self.files):
             
@@ -264,42 +286,44 @@ class QGOProblem:
 
 
     def setNodeCoordDictionaries(self):
-
+        node_list: list[QAOANode]
         for node_list in self.nodes_lists:
 
             self.ncds.append(self.getNodeCoordDict(node_list))
 
     def setCoordsLists(self):
-
+        node_list: list[QAOANode]
         for node_list in self.nodes_lists:
             self.coords_lists.append(self.getCoordList(node_list))
-
-    def __init__(self, links, prefixes, cutoffs):
-
-        self.setFiles(links)
-        self.prefixes = prefixes
-        
-        
-        self.setNodeLists(cutoffs, prefixes)
-        self.setCoordsLists()
-        self.setNodeCoordDictionaries()
 
 
 class QGOGraph:
 
-    qgo_problem = None
+    qgo_problem: QGOProblem = None
 
-    edges_lists = []
-    edge_list_names = {}
+    edges_lists: list[tuple[list[tuple[QAOANode, QAOANode]]]] = []
+    edge_list_names: dict[tuple[QAOANode, QAOANode], str] = {}
 
-    edges_capacities = []
-    all_edge_capacities = {}
+    edges_capacities: list[dict[tuple[QAOANode, QAOANode], float]] = []
+    all_edge_capacities: dict[tuple[QAOANode, QAOANode], float] = {}
 
-    edges_labels = []
+    edges_labels: list[dict[tuple[QAOANode, QAOANode], str]] = []
     
     graph = nx.DiGraph()
+
+    def __init__(self, qgo_problem: QGOProblem, thresholds: list[int]):
+
+        self.qgo_problem = qgo_problem
+        self.thresholds = thresholds
+        
+        self.setEdgeListsCapacitiesLabels(thresholds=thresholds)
+
+        self.setAllEdgeCapacities()
+        
+        self.setEdgeListNames()
+        #print(self.edge_list_names)
     
-    def getSquareMatrix(self, old_matrix):
+    def getSquareMatrix(self, old_matrix: np.ndarray) -> np.ndarray:
     
         rows, cols = old_matrix.shape
         max_dim = max(rows, cols)
@@ -309,27 +333,29 @@ class QGOGraph:
 
         return square_mat
 
-    def applyThreshold(self, matrix, threshold):
+    def applyThreshold(self, matrix: np.ndarray, threshold: int):
         matrix[matrix > threshold] = 0
     
-    def setEdgeListsCapacitiesLabels(self, thresholds):
+    def setEdgeListsCapacitiesLabels(self, thresholds: list[int]):
         
         nodes_lists = self.qgo_problem.nodes_lists
         coords_lists = self.qgo_problem.coords_lists
         
-        
         for i, _ in enumerate(coords_lists):
             
             if i < len(coords_lists) - 1:
-                first_coords_list = coords_lists[i]
-                second_coords_list = coords_lists[i + 1]
+                first_coords_list: tuple[float, float] = coords_lists[i]
+                second_coords_list: tuple[float, float] = coords_lists[i + 1]
                 
-                first_nodes_list = nodes_lists[i]
-                second_nodes_list = nodes_lists[i + 1]
+                first_nodes_list: list[QAOANode] = nodes_lists[i]
+                second_nodes_list: list[QAOANode] = nodes_lists[i + 1]
                 
-                dist_matrix = self.getSquareMatrix(pairwise_distances(first_coords_list, second_coords_list, metric='manhattan'))
+                dist_matrix: np.ndarray = self.getSquareMatrix(pairwise_distances(first_coords_list, second_coords_list, metric='manhattan'))
                 self.applyThreshold(dist_matrix, thresholds[i])
                 
+                edge_list: tuple[list[tuple[QAOANode, QAOANode]]]
+                edge_capacities: dict[tuple[QAOANode, QAOANode], float]
+                edge_labels: dict[tuple[QAOANode, QAOANode], str]
                 edge_list, edge_capacities, edge_labels = getEdgesAndCapacities(first_nodes_list, second_nodes_list, dist_matrix, 1)
                 
                 self.edges_lists.append(edge_list)
@@ -341,7 +367,7 @@ class QGOGraph:
         self.all_edge_capacities = {**self.edges_capacities[0], **self.edges_capacities[1]}
         nx.set_edge_attributes(self.graph, self.all_edge_capacities, "capacity")
 
-    def getEdgeNames(self, edge_list):
+    def getEdgeNames(self, edge_list: list[tuple[QAOANode, QAOANode]]) -> dict[tuple[QAOANode, QAOANode], str]:
     
         edge_names = {}
         
@@ -393,18 +419,6 @@ class QGOGraph:
 
         nx.draw_networkx_edge_labels(self.graph, ax=ax, pos=combineNodeCoords(first_ncd, second_ncd), edge_labels=self.edges_labels[0], font_size=12)
         nx.draw_networkx_edge_labels(self.graph, ax=ax, pos=combineNodeCoords(second_ncd, third_ncd), edge_labels=self.edges_labels[1], font_size=12)
-
-    def __init__(self, qgo_problem, thresholds):
-
-        self.qgo_problem = qgo_problem
-        self.thresholds = thresholds
-        
-        self.setEdgeListsCapacitiesLabels(thresholds=thresholds)
-
-        self.setAllEdgeCapacities()
-        
-        self.setEdgeListNames()
-        #print(self.edge_list_names)
         
         
 class QGOOptimizer: 
@@ -576,15 +590,15 @@ class QGOOptimizer:
 
         return p
 
-    def optimize(self, problem, QGOGraph):
+    def optimize(self, problem: QGOProblem, qgo_graph: QGOGraph):
 
         source_nodes = problem.nodes_lists[0]
         intermediary_nodes = problem.nodes_lists[1]
         
-        edge_list_names = QGOGraph.edge_list_names
-        all_edge_capacities = QGOGraph.all_edge_capacities
+        edge_list_names = qgo_graph.edge_list_names
+        all_edge_capacities = qgo_graph.all_edge_capacities
         
-        model = self.getMaxFlowModel(QGOGraph.graph, source_nodes=source_nodes, intermediary_nodes=intermediary_nodes, edge_list_names=edge_list_names, edge_capacities=all_edge_capacities)
+        model = self.getMaxFlowModel(qgo_graph.graph, source_nodes=source_nodes, intermediary_nodes=intermediary_nodes, edge_list_names=edge_list_names, edge_capacities=all_edge_capacities)
 
         model.write("max_flow_model.lp", filetype='lp')
         m = ModelReader.read("max_flow_model.lp")
