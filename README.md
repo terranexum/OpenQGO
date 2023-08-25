@@ -2,13 +2,13 @@
 
 A live public demo is available at https://studio.foursquare.com/public/23ac96cc-cb35-4168-9c9b-926ad7eaa272. 
 
-Contributions made by Anish Jahagirdar of Lakewood High School for TerraNexum.
+Contributions made by Anish Jahagirdar of Lakewood High School for [TerraNexum](https://www.terranexum.com/).
 
 ![OpenQGO Demo for the Jefferson County, KY area](https://github.com/terranexum/OpenQGO/blob/dahl-dev/images/OpenQGO_demo_KY.png)
 
 ## About TerraNexum
 
-TerraNexum is a company located in Evergreen, Colorado focused on combatting environmental sustainability issues throughout the world. They host many sustainability projects including researching and developing carbon capture hardware, energy technologies (solar canopies, batteries, etc), and the use of quantum computing to solve complex optimization problems that can lead to better energy and sustainability planning.
+[TerraNexum](https://www.terranexum.com/) is a company located in Evergreen, Colorado focused on combatting environmental sustainability issues throughout the world. They host many sustainability projects including researching and developing carbon capture hardware, energy technologies (solar canopies, batteries, etc), and the use of quantum computing to solve complex optimization problems that can lead to better energy and sustainability planning.
 
 ![TN Logo](https://media.licdn.com/dms/image/D560BAQEHjvadbsgQvQ/company-logo_200_200/0/1688195130686?e=2147483647&v=beta&t=Lc05yWlBt-qerpFeBYdWTH70P2uuJvdV396e_Nn0iXg)
 
@@ -42,3 +42,6 @@ Dahl Winters was my mentor at TerraNexum and she was the greatest mentor that I 
 
 ![Colorado Service Utilities Servicing](https://drive.google.com/uc?export=download&id=1IgJTXIJn_QAsr7vs9vlDAc7qrZ6SRUaJ)
 
+## Contributing
+
+If you want to contribute, fork this repo, make changes in a feature branch in your fork, and issue a pull request back to `main` branch in this repo.
