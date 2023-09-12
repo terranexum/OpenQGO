@@ -8,7 +8,6 @@ OpenQGO, along with all of the Open Projects run by TerraNexum are hosted on the
 
 
 
-
 # **OpenQGO**
 
 A live public demo is available at https://studio.foursquare.com/public/23ac96cc-cb35-4168-9c9b-926ad7eaa272. 
