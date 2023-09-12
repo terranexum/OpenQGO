@@ -8,6 +8,7 @@
 #import openqaoa
 
 import networkx as nx
+from networkx.classes.reportviews import OutEdgeView, InEdgeView
 #import geonetworkx as gnx
 #import pyproj
 #import rtree
@@ -23,6 +24,7 @@ import geopandas as gpd
 #from libpysal import weights
 
 import numpy as np
+from qiskit_optimization import QuadraticProgram
 #import sklearn
 
 from sklearn.metrics import pairwise_distances
@@ -80,7 +82,7 @@ from qiskit_optimization.converters import (
 )
 
 
-from qiskit_optimization.algorithms.admm_optimizer import ADMMParameters, ADMMOptimizer
+from qiskit_optimization.algorithms.admm_optimizer import ADMMParameters, ADMMOptimizer, ADMMOptimizationResult
 from qiskit.algorithms.minimum_eigensolvers import QAOA # NumPyMinimumEigensolver
 from qiskit.algorithms.optimizers import COBYLA
 from qiskit.primitives import Sampler
@@ -112,7 +114,7 @@ class QAOANode:
     def changeName(self, new_name: str):
         self.name = new_name
         
-    def __str__(self):
+    def __repr__(self):
         return self.name
 
 
@@ -239,7 +241,7 @@ class QGOProblem:
 
             if idx == idx_cutoff: break
 
-            node = QAOANode(row, prefix + " " + str(idx))
+            node = QAOANode(row, f"{prefix} {idx}")
 
             node_list.append(node)
 
@@ -423,12 +425,13 @@ class QGOGraph:
         
 class QGOOptimizer: 
 
-    solution = None
+    solution: ADMMOptimizationResult = None
     
-    def getObjectiveFunction(self, graph, source_nodes, edge_list_names):
+    def getObjectiveFunction(self, graph: nx.DiGraph, source_nodes: list[QAOANode], edge_list_names: dict[tuple[QAOANode, QAOANode], str]) -> list[float]:
     
         obj_func = []
 
+        edge: tuple[QAOANode, QAOANode]
         for edge in edge_list_names.keys():
 
             out_node = edge[0]
@@ -444,9 +447,20 @@ class QGOOptimizer:
     
 
 
-    def getConstraints(self, graph, intermediary_nodes, edge_list_names, edge_capacities):
+    def getConstraints(
+            self,
+            graph: nx.DiGraph,
+            intermediary_nodes: list[QAOANode],
+            edge_list_names: dict[tuple[QAOANode, QAOANode], str],
+            edge_capacities: dict[tuple[QAOANode, QAOANode], float]
+        ) -> tuple[
+            list[str],
+            list[str],
+            list[list[list[str], list[int]]],
+            list[int]
+        ]:
 
-        constraints = [] #gets filled in
+        constraints: list[list[list[str], list[int]]] = [] #gets filled in
 
 
 
@@ -454,19 +468,19 @@ class QGOOptimizer:
         for node in intermediary_nodes:
 
             #get the edges going INTO the powerplants(from the coal mines)
-            in_edges = graph.in_edges(node)
+            in_edges: InEdgeView = graph.in_edges(node)
 
             #get the edges going OUT of the powerplants(into the cities)
-            out_edges = graph.out_edges(node)
+            out_edges: OutEdgeView = graph.out_edges(node)
 
             if len(in_edges) == 0 or len(out_edges) == 0: 
 
                 continue
 
-            all_edges = list(in_edges) + list(out_edges)
-            names = []
+            all_edges: list[tuple[QAOANode, QAOANode]] = list(in_edges) + list(out_edges)
+            names: list[str] = []
 
-            constraint_values = []
+            constraint_values: list[int] = []
 
 
 
@@ -500,10 +514,10 @@ class QGOOptimizer:
 
                 constraint_names.append(str(idx))
 
-            constraint_senses = ['E'] * len(constraints) #should all be equality -- the outflow should never be more than the inflow -- should be equal at most
-            righthand_sides = [0] * len(constraints) #just zeroes
+            constraint_senses: list[str] = ['E'] * len(constraints) #should all be equality -- the outflow should never be more than the inflow -- should be equal at most
+            righthand_sides: list[int] = [0] * len(constraints) #just zeroes
 
-
+            # QUESTION: this returns after evaluating only a single intermediary node?
             return constraint_names, constraint_senses, constraints, righthand_sides
 
     
@@ -541,7 +555,14 @@ class QGOOptimizer:
 
     # Initialize
 
-    def getMaxFlowModel(self, graph, source_nodes, intermediary_nodes, edge_list_names, edge_capacities):
+    def getMaxFlowModel(
+            self,
+            graph: nx.DiGraph,
+            source_nodes: list[QAOANode],
+            intermediary_nodes: list[QAOANode],
+            edge_list_names: dict[tuple[QAOANode, QAOANode], str],
+            edge_capacities: dict[tuple[QAOANode, QAOANode], float]
+        ) -> cplex.Cplex:
 
         p = cplex.Cplex()
 
@@ -555,16 +576,16 @@ class QGOOptimizer:
         #v   = ["s1", "13", "3t", "14", "s2", "24", "4t"]  EQUIVALENT TO EDGE LIST
 
         #names of the edges are defined in the edge_list_names dictionary
-        names = [*edge_list_names.values()]
+        names: list[tuple[QAOANode, QAOANode]] = [*edge_list_names.values()]
 
         #the total flow is equal to the inflow - outflow -- inflow is defined by the flow directly following the source node, we want to maximize this hence the 1s
-        obj_func = self.getObjectiveFunction(graph, source_nodes, edge_list_names)
+        obj_func: list[float] = self.getObjectiveFunction(graph, source_nodes, edge_list_names)
 
         #lowest flow value is zero for any edge
-        low_bnd  = np.zeros(shape=len(edge_capacities))
+        low_bnd: np.ndarray[float]  = np.zeros(shape=len(edge_capacities))
 
         #upper bounds are the edge capacities
-        upr_bnd  = [*edge_capacities.values()] # Capacity constraints
+        upr_bnd: list[float]  = [*edge_capacities.values()] # Capacity constraints
 
 
 
@@ -574,6 +595,10 @@ class QGOOptimizer:
 
 
         #set linear constraints
+        cnames: list[str]
+        csenses: list[str]
+        constraints: list[list[list[str], list[int]]]
+        rhs: list[int]
         cnames, csenses, constraints, rhs = self.getConstraints(graph, intermediary_nodes, edge_list_names=edge_list_names, edge_capacities=edge_capacities)
         p.linear_constraints.add(lin_expr=constraints,
                                 senses = csenses,
@@ -592,18 +617,18 @@ class QGOOptimizer:
 
     def optimize(self, problem: QGOProblem, qgo_graph: QGOGraph):
 
-        source_nodes = problem.nodes_lists[0]
-        intermediary_nodes = problem.nodes_lists[1]
+        source_nodes: list[QAOANode] = problem.nodes_lists[0]
+        intermediary_nodes: list[QAOANode] = problem.nodes_lists[1]
         
-        edge_list_names = qgo_graph.edge_list_names
-        all_edge_capacities = qgo_graph.all_edge_capacities
+        edge_list_names: dict[tuple[QAOANode, QAOANode], str] = qgo_graph.edge_list_names
+        all_edge_capacities: dict[tuple[QAOANode, QAOANode], float] = qgo_graph.all_edge_capacities
         
-        model = self.getMaxFlowModel(qgo_graph.graph, source_nodes=source_nodes, intermediary_nodes=intermediary_nodes, edge_list_names=edge_list_names, edge_capacities=all_edge_capacities)
+        model: cplex.Cplex = self.getMaxFlowModel(qgo_graph.graph, source_nodes=source_nodes, intermediary_nodes=intermediary_nodes, edge_list_names=edge_list_names, edge_capacities=all_edge_capacities)
 
         model.write("max_flow_model.lp", filetype='lp')
         m = ModelReader.read("max_flow_model.lp")
 
-        qp = from_docplex_mp(m)
+        qp: QuadraticProgram = from_docplex_mp(m)
         #print(qp.prettyprint())
 
         admm_params = ADMMParameters(rho_initial=1001, beta=1000, factor_c=900, maxiter=500, three_block=True, tol=1.0)
@@ -612,7 +637,7 @@ class QGOOptimizer:
         self.solution = admm_quantum.solve(qp)
         return str(self.solution)
     
-    def createSolutionGraph(self, problem, graph) -> nx.DiGraph:
+    def createSolutionGraph(self, problem: QGOProblem, graph: QGOGraph) -> nx.DiGraph:
         
         sol_edge_list_names = {}
         sol_edge_list_two_names = {}
