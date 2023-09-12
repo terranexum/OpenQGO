@@ -1,3 +1,14 @@
+# Our Contributors and Backers
+
+OpenQGO, along with all of the Open Projects run by TerraNexum are hosted on the OpenCollective website. OpenCollective allows open-source projects, such as OpenQGO, to gain traction and funding allowing access to transparent financial transactions between TerraNexum and you. Thank you!
+
+[TerraNexum's OpenCollective Profile](https://opencollective.com/terranexum)
+
+[OpenCollective's GitHub](https://github.com/opencollective/opencollective)
+
+
+
+
 # **OpenQGO**
 
 A live public demo is available at https://studio.foursquare.com/public/23ac96cc-cb35-4168-9c9b-926ad7eaa272. 
