@@ -1,2 +1,1 @@
-*.sh text eol=lf
 ELEC.txt filter=lfs diff=lfs merge=lfs -text
