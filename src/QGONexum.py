@@ -606,11 +606,11 @@ class QGOOptimizer:
                                 names = cnames)
 
 
-        #pretty print
-       # print("Problem Type: %s" % p.problem_type[p.get_problem_type()])
-       # p.solve()
-       # print("Solution result is: %s" % p.solution.get_status_string())
-       # print(p.solution.get_values())
+    #pretty print
+    # print("Problem Type: %s" % p.problem_type[p.get_problem_type()])
+    # p.solve()
+    # print("Solution result is: %s" % p.solution.get_status_string())
+    # print(p.solution.get_values())
 
 
         return p
@@ -630,6 +630,12 @@ class QGOOptimizer:
 
         qp: QuadraticProgram = from_docplex_mp(m)
         #print(qp.prettyprint())
+
+        #OPTIMIZERS TO TEST
+        #Just trying QAOA or possibly even adding our own unique branch to an already existing QAOA to fit our needs
+        #Qiskit, Pennylane
+        #QAOA, VQE, QADMM, QPPA, QSGD
+        #Accelerate these qiskit optimizers using NVIDIA's QuQuantum
 
         admm_params = ADMMParameters(rho_initial=1001, beta=1000, factor_c=900, maxiter=500, three_block=True, tol=1.0)
         admm_quantum = ADMMOptimizer(params=admm_params, qubo_optimizer=MinimumEigenOptimizer(QAOA(sampler=Sampler(), optimizer=COBYLA())), continuous_optimizer=CobylaOptimizer())

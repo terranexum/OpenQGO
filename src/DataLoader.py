@@ -35,6 +35,12 @@ class QGOFile:
      geojson_file = None 
 
      
+     #ASSUMPTIONS MADE
+
+     #EACH LINE REPRESENTS A NEW NODE
+
+     #Pattern of Encapsulating, Separating, Encapsulating, Different Separating
+
      def prepareFile(self):
           
 
@@ -43,19 +49,28 @@ class QGOFile:
 
           i = 0
 
-          encapsulating_stack = deque()
-          encapsulating_indices = []
+          
 
           #check each line of data file
           for line in self.orig_file:
                
-               
                if i == 1: break
 
                #create stack to store encapsulating indices
-               
+               #first in, last out -- the first encapsulating marks we find will be the last to get out
+               encapsulating_stack = deque()
+
+               #encapsulating indices store tuples of indices(representing the range of indices that encapsulating marks cover)
+               encapsulating_indices = []
+
+               #separating indices are just one value of what the separating mark index is
+               separating_marks = []
 
                index = 0
+
+               pattern_arr = []
+
+               
 
                #iterate over characters
                for char in line:
@@ -64,13 +79,14 @@ class QGOFile:
                     if char in encapsulating_start_marks:
                          
                          
-
+                         #because quotations are the same for starting and ending marks, has to have a separate case sadly
                          if char == "\"" and encapsulating_stack[-1][0] == "\"":
-                              print('here')
                               start_idx = encapsulating_stack[-1][1]
 
                               encapsulating_stack.pop()
-                              encapsulating_indices.append((start_idx, index))
+                              encapsulating_indices.append((start_idx, index, "\""))
+
+                              pattern_arr.append(("enc", encapsulating_indices[-1]))
 
                          else:
                               encapsulating_stack.append((char, index))
@@ -85,20 +101,35 @@ class QGOFile:
                          if self.encapsulating_marks[last_item[0]] == char:
 
                               encapsulating_stack.pop()
-                              encapsulating_indices.append((last_item[1], index))
+
+                              #store indices within the line that these encapsulating marks cover
+                              encapsulating_indices.append((last_item[1], index, last_item[0]))
+                              pattern_arr.append(("enc", encapsulating_indices[-1]))
+
+                    #
+                    # stack : ['{', '"', ]
+                    #
+                    #
+                    #
+
+                    elif char in self.separating_marks:
+                         
+                         
+                         separating_marks.append((char, index))
+                         pattern_arr.append(("sep", separating_marks[-1]))
+
 
                     index += 1
 
+
+               #for j in range(len(pattern_arr)):
+
+
                i += 1
 
-          for indices in encapsulating_indices:
-
-               print(indices)
                
 
-
-
-     def convertTxtToGeoJSON(self):
+     def convertTxtToJSON(self):
 
           fieldValueDict = {}
 
@@ -114,6 +145,35 @@ class QGOFile:
           
           pass
      
+     def limitData():
+
+          return
+     
+     #tell the user what data is numeric and what is not
+     def getNumericData():
+
+          return
+     
+     #represent non-numeric data as numeric data
+     def createCategoricalData():
+
+          return
+     
+     #change units of dataset
+     def applyScale():
+
+          return
+
+     #filter data 
+     def filterData():
+
+          return
+
+     #export GeoJSON file so user can download and use
+     def exportGEOJSON():
+
+
+          return 
 
      #def multiSplit(a):
 
