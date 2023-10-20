@@ -6,7 +6,7 @@ OpenQGO, along with all of the Open Projects run by TerraNexum are hosted on the
 
 [OpenCollective's GitHub](https://github.com/opencollective/opencollective)
 
-
+[Colorado Quantum Presentation](https://www.canva.com/design/DAFsGm3fP6U/kdoIJZqJOpN2aAUmN8PH7w/edit?utm_content=DAFsGm3fP6U&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton)
 
 # **OpenQGO**
 
