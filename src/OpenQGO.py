@@ -85,7 +85,9 @@ printing.init_printing(use_latex=True)
 
 pyp.rcParams["figure.figsize"] = (20, 20)
 
-from QGONexum import QGOProblem, QGOGraph, QGOOptimizer
+from QGOProblem import QGOProblem, QGOGraph
+from QGOOptimizer import QGOOptimizer
+
 from QGOOut import QGOExporter
 
 from pathlib import Path
