@@ -59,7 +59,8 @@ printing.init_printing(use_latex=True)
 
 
 #import the QAOA workflow model
-from openqaoa import QAOA
+
+#from openqaoa import QAOA
 
 #import method to specify the device
 #from openqaoa.backends import create_device

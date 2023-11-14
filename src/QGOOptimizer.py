@@ -1,4 +1,11 @@
 from QAOANode import QAOANode
+from QGOProblem import QGOProblem, QGOGraph
+
+from qiskit import QuantumCircuit
+
+
+from qiskit.algorithms.optimizers import ISRES
+
 from docplex.mp.model_reader import ModelReader
 
 #from qiskit_optimization import QuadraticProgram
@@ -12,6 +19,8 @@ from qiskit_optimization.converters import (
     QuadraticProgramToQubo    # combines the previous three converters
 )
 
+from qiskit_optimization import QuadraticProgram
+
 
 from qiskit_optimization.algorithms.admm_optimizer import ADMMParameters, ADMMOptimizer, ADMMOptimizationResult
 from qiskit.algorithms.minimum_eigensolvers import QAOA # NumPyMinimumEigensolver
@@ -20,8 +29,16 @@ from qiskit.primitives import Sampler
 from qiskit_optimization.algorithms import CobylaOptimizer, MinimumEigenOptimizer
 
 
+
+
 import networkx as nx
 from networkx.classes.reportviews import OutEdgeView, InEdgeView
+
+
+import matplotlib.pyplot as pyp
+import cplex
+
+import numpy as np
 
 class QGOOptimizer: 
 
@@ -61,7 +78,7 @@ class QGOOptimizer:
         ]:
 
         constraints: list[list[list[str], list[int]]] = [] #gets filled in
-
+        constraint_names = []
 
 
         #iterate over intermediate nodes
@@ -80,9 +97,8 @@ class QGOOptimizer:
             all_edges: list[tuple[QAOANode, QAOANode]] = list(in_edges) + list(out_edges)
             names: list[str] = []
 
+            #value of 1 assigned for inflow and -1 for outflow
             constraint_values: list[int] = []
-
-
 
             #iterate over the in_edges
             for edge in in_edges:
@@ -107,18 +123,16 @@ class QGOOptimizer:
             constraints.append([names, constraint_values])
 
 
+        #don't really need to access the constraints themselves
+        for idx in range(len(constraints)):
 
-            constraint_names = []
-
-            for idx, val in enumerate(constraints):
-
-                constraint_names.append(str(idx))
+            constraint_names.append(str(idx))
 
             constraint_senses: list[str] = ['E'] * len(constraints) #should all be equality -- the outflow should never be more than the inflow -- should be equal at most
             righthand_sides: list[int] = [0] * len(constraints) #just zeroes
 
-            # QUESTION: this returns after evaluating only a single intermediary node?
-            return constraint_names, constraint_senses, constraints, righthand_sides
+        #why does this return after only checking one intermediate node? 
+        return constraint_names, constraint_senses, constraints, righthand_sides
 
     
     #GitHub Gist Link: https://gist.github.com/stevenwalton/601645612161fb6ebf82dd7687de0060 
@@ -189,7 +203,7 @@ class QGOOptimizer:
 
 
 
-        #add model variables
+        #add model variables -- stuff we calculated above
         p.variables.add(obj=obj_func, lb=low_bnd.tolist(), ub=upr_bnd, names=names)
 
 
@@ -301,3 +315,24 @@ class QGOOptimizer:
 
         #pyp.show()
         return sol_graph
+    
+    
+    #CONSIDER USING QML(Quantum Machine Learning) to Improve Parameters of Mixer Hamiltonian
+
+    def getMixerHamiltonian(self):
+
+        #using 2 QuBits for Mixer Hamiltonian
+        mixer = QuantumCircuit(3)
+
+        #CX is the Controlled NOT gate
+        mixer.cx(control_qubit=mixer[0], target_qubit=mixer[1], label="mixer_cx")
+
+        return mixer
+
+    def createQAOAInstance(self):
+
+        q = QAOA(optimizer=ISRES(max_evals=1000), 
+                reps=1,
+                mixer=self.getMixerHamiltonian())
+        
+        return q
