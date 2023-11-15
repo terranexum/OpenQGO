@@ -49,8 +49,6 @@ class QGOFile:
 
           i = 0
 
-          
-
           #check each line of data file
           for line in self.orig_file:
                
@@ -121,13 +119,112 @@ class QGOFile:
 
                     index += 1
 
+               
+               true_pattern_arr = []
+               j = 0
 
-               #for j in range(len(pattern_arr)):
+               
 
+               
+               while j < len(pattern_arr):
+
+                    #print(pattern_arr[j][0] + ", " +  "(" + str(pattern_arr[j][1][0]) + ", " + str(pattern_arr[j][1][1]) + ")")
+
+                    #make concise later
+
+                    #if there are two separating marks in a row
+                    if j > 0 and pattern_arr[j][0] != "enc" and pattern_arr[j - 1][0] == "sep": #good
+
+                         #repeating sep, sep case
+                         
+                         #the index of the first separating mark
+                         idx_in_line = pattern_arr[j - 1][1][1] #good
+
+
+                         condition_met = False
+                         idx = j + 1
+
+                         while not condition_met: # good
+
+                              if idx < len(pattern_arr): # good
+                                   
+                                   #if we're an encapsulating mark and the starting index is 1 above the separating mark index
+                                   if pattern_arr[idx][0] == "enc":
+                                        
+                                        first_encap_index = pattern_arr[idx][1][0]
+                                   
+                                        #print(first_encap_index)
+                                        
+                                        if first_encap_index == idx_in_line + 1: 
+                                             
+                                             #we're gonna add this to the true pattern array but NOT the separating and encapsulating marks in between this and the last sep mark
+                                             true_pattern_arr.append(pattern_arr[idx])
+
+                                             condition_met = True
+                                             j = idx + 1
+                              idx += 1
+                    
+                    else:
+
+                         true_pattern_arr.append(pattern_arr[j])
+                         j += 1
+
+                    
+               for pattern in true_pattern_arr:
+
+                    if pattern[0] == "enc":
+                         
+                         first_idx = pattern[1][0]
+                         second_idx = pattern[1][1]
+
+                         print(line[first_idx:second_idx + 1])
+               ###########################################################
+               
+               #for k in range(len(true_pattern_arr)):
+
+                    #print(true_pattern_arr[k][0])
 
                i += 1
 
-               
+          #self.assignFieldsAndValues(pattern_array=true_pattern_arr, line_idx=0)
+
+     def assignFieldsAndValues(self, pattern_array : str, line_idx : int):
+
+          i = 0
+
+          #print(len(pattern_array))
+
+          for line in self.orig_file:
+
+               if i == 1: break
+               kvp_idx = 0
+
+               #for pattern_marker in pattern_array:
+
+                    #if pattern_marker[0] == "enc":
+                         
+                         #print(str(pattern_marker[1][0]) + ", " + str(pattern_marker[1][1]))
+
+                         #print(line[pattern_marker[1][0]:pattern_marker[1][1]] + "\n")
+                         #first_encap_idx = pattern_marker[1][0]
+                         #second_encap_idx = pattern_marker[1][1]
+
+                         #if kvp_idx % 2 == 0:
+
+                              #self.fields.append(line[first_encap_idx:second_encap_idx])
+                         
+                    # else:
+
+                              #self.values.append(line[first_encap_idx:second_encap_idx])
+
+                         #kvp_idx += 1
+               #i += 1
+
+          for field in self.fields:
+
+               print(field)
+
+          return 
 
      def convertTxtToJSON(self):
 
@@ -210,5 +307,4 @@ class QGOFile:
      
 
 qgoFile = QGOFile("C:\\Users\\Anish J\\Desktop\OpenQGO\src\\ELEC.txt")
-
 qgoFile.prepareFile()

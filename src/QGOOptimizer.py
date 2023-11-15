@@ -131,7 +131,7 @@ class QGOOptimizer:
             constraint_senses: list[str] = ['E'] * len(constraints) #should all be equality -- the outflow should never be more than the inflow -- should be equal at most
             righthand_sides: list[int] = [0] * len(constraints) #just zeroes
 
-        #why does this return after only checking one intermediate node? 
+        #why does this return after only checking one intermediate node? FIXED
         return constraint_names, constraint_senses, constraints, righthand_sides
 
     
