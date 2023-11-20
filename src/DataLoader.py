@@ -31,6 +31,9 @@ class QGOFile:
 
      ]
 
+     encapsulating_start_marks = list(encapsulating_marks.keys())
+     encapsulating_end_marks = list(encapsulating_marks.values())
+
      orig_file = None
      geojson_file = None 
 
@@ -43,186 +46,157 @@ class QGOFile:
 
      def prepareFile(self):
           
-
-          encapsulating_start_marks = list(self.encapsulating_marks.keys())
-          encapsulating_end_marks = list(self.encapsulating_marks.values())
-
           i = 0
 
           #check each line of data file
           for line in self.orig_file:
                
+               #for testing, stop after the first line
                if i == 1: break
 
-               #create stack to store encapsulating indices
-               #first in, last out -- the first encapsulating marks we find will be the last to get out
-               encapsulating_stack = deque()
-
-               #encapsulating indices store tuples of indices(representing the range of indices that encapsulating marks cover)
-               encapsulating_indices = []
-
-               #separating indices are just one value of what the separating mark index is
-               separating_marks = []
-
-               index = 0
-
-               pattern_arr = []
-
+               pattern_arr = self.createPatternArray(line)
+               desired_pattern_arr = self.getDesiredPatternArr(pattern_arr)
                
+               print(desired_pattern_arr)
 
-               #iterate over characters
-               for char in line:
-                    
-                    #check if character starts an encapsulating sequence
-                    if char in encapsulating_start_marks:
-                         
-                         
-                         #because quotations are the same for starting and ending marks, has to have a separate case sadly
-                         if char == "\"" and encapsulating_stack[-1][0] == "\"":
-                              start_idx = encapsulating_stack[-1][1]
+               #self.assignFieldsAndValues(desired_pattern_arr=desired_pattern_arr, line=line)
 
-                              encapsulating_stack.pop()
-                              encapsulating_indices.append((start_idx, index, "\""))
-
-                              pattern_arr.append(("enc", encapsulating_indices[-1]))
-
-                         else:
-                              encapsulating_stack.append((char, index))
-                         
-                    #if we've gotten to an end encapsulating mark
-                    elif char in encapsulating_end_marks:
-                         
-                         #check last item we added in stack
-                         last_item = encapsulating_stack[-1]
-
-                         #if the end mark we found matches up with the starting mark, we can take it out
-                         if self.encapsulating_marks[last_item[0]] == char:
-
-                              encapsulating_stack.pop()
-
-                              #store indices within the line that these encapsulating marks cover
-                              encapsulating_indices.append((last_item[1], index, last_item[0]))
-                              pattern_arr.append(("enc", encapsulating_indices[-1]))
-
-                    #
-                    # stack : ['{', '"', ]
-                    #
-                    #
-                    #
-
-                    elif char in self.separating_marks:
-                         
-                         
-                         separating_marks.append((char, index))
-                         pattern_arr.append(("sep", separating_marks[-1]))
-
-
-                    index += 1
-
-               
-               true_pattern_arr = []
-               j = 0
-
-               
-
-               
-               while j < len(pattern_arr):
-
-                    #print(pattern_arr[j][0] + ", " +  "(" + str(pattern_arr[j][1][0]) + ", " + str(pattern_arr[j][1][1]) + ")")
-
-                    #make concise later
-
-                    #if there are two separating marks in a row
-                    if j > 0 and pattern_arr[j][0] != "enc" and pattern_arr[j - 1][0] == "sep": #good
-
-                         #repeating sep, sep case
-                         
-                         #the index of the first separating mark
-                         idx_in_line = pattern_arr[j - 1][1][1] #good
-
-
-                         condition_met = False
-                         idx = j + 1
-
-                         while not condition_met: # good
-
-                              if idx < len(pattern_arr): # good
-                                   
-                                   #if we're an encapsulating mark and the starting index is 1 above the separating mark index
-                                   if pattern_arr[idx][0] == "enc":
-                                        
-                                        first_encap_index = pattern_arr[idx][1][0]
-                                   
-                                        #print(first_encap_index)
-                                        
-                                        if first_encap_index == idx_in_line + 1: 
-                                             
-                                             #we're gonna add this to the true pattern array but NOT the separating and encapsulating marks in between this and the last sep mark
-                                             true_pattern_arr.append(pattern_arr[idx])
-
-                                             condition_met = True
-                                             j = idx + 1
-                              idx += 1
-                    
-                    else:
-
-                         true_pattern_arr.append(pattern_arr[j])
-                         j += 1
-
-                    
-               for pattern in true_pattern_arr:
-
-                    if pattern[0] == "enc":
-                         
-                         first_idx = pattern[1][0]
-                         second_idx = pattern[1][1]
-
-                         print(line[first_idx:second_idx + 1])
-               ###########################################################
-               
-               #for k in range(len(true_pattern_arr)):
-
-                    #print(true_pattern_arr[k][0])
 
                i += 1
+               
 
-          #self.assignFieldsAndValues(pattern_array=true_pattern_arr, line_idx=0)
 
-     def assignFieldsAndValues(self, pattern_array : str, line_idx : int):
+     def createPatternArray(self, line):
+
+          encapsulating_stack = deque()
+          #encapsulating indices store tuples of indices(representing the range of indices that encapsulating marks cover)
+          encapsulating_indices = []
+
+          #separating indices are just one value of what the separating mark index is
+          separating_marks = []
+
+          index = 0
+
+          pattern_arr = []
+
+          #iterate over characters
+          for char in line:
+               
+               #check if character starts an encapsulating sequence
+               if char in self.encapsulating_start_marks:
+                    
+                    
+                    #because quotations are the same for starting and ending marks, has to have a separate case sadly
+                    if char == "\"" and encapsulating_stack[-1][0] == "\"":
+                         start_idx = encapsulating_stack[-1][1]
+
+                         encapsulating_stack.pop()
+                         encapsulating_indices.append(("\"", start_idx, index))
+
+                         pattern_arr.append(("enc", encapsulating_indices[-1]))
+
+                    else:
+                         encapsulating_stack.append((char, index))
+                    
+               #if we've gotten to an end encapsulating mark
+               elif char in self.encapsulating_end_marks:
+                    
+                    #check last item we added in stack
+                    last_item = encapsulating_stack[-1]
+
+                    #if the end mark we found matches up with the starting mark, we can take it out
+                    if self.encapsulating_marks[last_item[0]] == char:
+
+                         encapsulating_stack.pop()
+                         #store indices within the line that these encapsulating marks cover
+                         encapsulating_indices.append((last_item[0], last_item[1], index))
+                         pattern_arr.append(("enc", encapsulating_indices[-1]))
+
+
+               elif char in self.separating_marks:
+                    
+                    separating_marks.append((char, index))
+                    pattern_arr.append(("sep", separating_marks[-1]))
+
+
+               index += 1
+
+          return pattern_arr
+               
+
+     def getDesiredPatternArr(self, pattern_arr):
+          
+          #desired pattern : enc, sep, enc, sep, enc, sep, enc, sep...
+          reached_desired_pattern = False
+
+          des_pattern_arr = []
 
           i = 0
 
-          #print(len(pattern_array))
+          while i < len(pattern_arr) - 1:
 
-          for line in self.orig_file:
+               marker = pattern_arr[i][0]
+               next_marker = pattern_arr[i+1][0]
 
-               if i == 1: break
-               kvp_idx = 0
+               #repeating marker
+               if marker == next_marker:
 
-               #for pattern_marker in pattern_array:
+                    have_collapsed = False
+                    first_bound_index = pattern_arr[i][1][1]
 
-                    #if pattern_marker[0] == "enc":
-                         
-                         #print(str(pattern_marker[1][0]) + ", " + str(pattern_marker[1][1]))
+                    if marker == "sep":
+                         des_pattern_arr.append(pattern_arr[i])
+                         first_bound_index = pattern_arr[i+1][1][1]
 
-                         #print(line[pattern_marker[1][0]:pattern_marker[1][1]] + "\n")
-                         #first_encap_idx = pattern_marker[1][0]
-                         #second_encap_idx = pattern_marker[1][1]
+                    j = i + 1
 
-                         #if kvp_idx % 2 == 0:
+                    while (not have_collapsed) and (j < len(pattern_arr)):
 
-                              #self.fields.append(line[first_encap_idx:second_encap_idx])
-                         
-                    # else:
+                         first_encap_idx = pattern_arr[j][1][1]
 
-                              #self.values.append(line[first_encap_idx:second_encap_idx])
+                         if first_encap_idx < first_bound_index: 
 
-                         #kvp_idx += 1
-               #i += 1
+                              des_pattern_arr.append(pattern_arr[j])
+                              have_collapsed = True
 
-          for field in self.fields:
+                         j += 1
 
-               print(field)
+                    i = j
+                    
+               else:
+
+                    des_pattern_arr.append(pattern_arr[i])
+                    i += 1
+                    
+          return des_pattern_arr
+
+     def assignFieldsAndValues(self, line : str, desired_pattern_arr):
+
+          kvp_idx = 0
+
+          for pattern_marker in desired_pattern_arr:
+
+               if pattern_marker[0] == "enc":
+                    
+                    first_encap_idx = pattern_marker[1][1]
+                    second_encap_idx = pattern_marker[1][2]
+
+                    print(type(second_encap_idx))
+
+                    if kvp_idx % 2 == 0:
+
+                         self.fields.append(line[first_encap_idx:second_encap_idx + 1])
+                    
+                    else:
+
+                         self.values.append(line[first_encap_idx:second_encap_idx + 1])
+
+                    kvp_idx += 1
+                    
+
+          for value in self.values:
+
+               print(value)
 
           return 
 
