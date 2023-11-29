@@ -57,9 +57,12 @@ class QGOFile:
                pattern_arr = self.createPatternArray(line)
                desired_pattern_arr = self.getDesiredPatternArr(pattern_arr)
                
-               print(desired_pattern_arr)
+               #print(desired_pattern_arr)
 
-               #self.assignFieldsAndValues(desired_pattern_arr=desired_pattern_arr, line=line)
+               new_pattern_arr = self.compactPatternArray(desired_pattern_arr)
+
+               #print(new_pattern_arr)
+               self.assignFieldsAndValues(desired_pattern_arr=desired_pattern_arr, line=line)
 
 
                i += 1
@@ -150,6 +153,7 @@ class QGOFile:
 
                     j = i + 1
 
+                    #we need to find an encapsulating mark that is able to collapse the repeating separating mark and keep our desired pattern
                     while (not have_collapsed) and (j < len(pattern_arr)):
 
                          first_encap_idx = pattern_arr[j][1][1]
@@ -164,11 +168,52 @@ class QGOFile:
                     i = j
                     
                else:
-
+                    
+                    #all good, we can add directly to our desired pattern array
                     des_pattern_arr.append(pattern_arr[i])
                     i += 1
                     
           return des_pattern_arr
+     
+     def compactPatternArray(self, des_pattern_arr):
+
+          #work backwards
+
+          i = len(des_pattern_arr) - 1
+
+          while i >= 0:
+
+               cur_marker = des_pattern_arr[i][0]
+               first_i_idx = des_pattern_arr[i][1][1]
+
+               #we can only collapse encapsulating markers
+               if cur_marker == "enc":
+
+                    j = 0
+
+                    while j < len(des_pattern_arr) and j < i:
+
+                         marker_type = des_pattern_arr[j][0]
+
+                         if marker_type == "enc":
+                              
+                              first_j_idx = des_pattern_arr[j][1][1]
+
+                              if first_i_idx < first_j_idx:
+
+                                   #print(str(first_i_idx) + ", " + str(first_j_idx))
+                                   #meaning element i encompasses element j and all elements after -- it's time to compact
+                                   
+                                   del des_pattern_arr[j:i]
+
+                                   i = j
+
+                         j += 1
+
+               i -= 1
+
+          return des_pattern_arr
+
 
      def assignFieldsAndValues(self, line : str, desired_pattern_arr):
 
@@ -181,7 +226,6 @@ class QGOFile:
                     first_encap_idx = pattern_marker[1][1]
                     second_encap_idx = pattern_marker[1][2]
 
-                    print(type(second_encap_idx))
 
                     if kvp_idx % 2 == 0:
 
