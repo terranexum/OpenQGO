@@ -23,9 +23,8 @@ from qiskit_optimization.algorithms import CobylaOptimizer, MinimumEigenOptimize
 import networkx as nx
 from networkx.classes.reportviews import OutEdgeView, InEdgeView
 
-
+import Cplex
 import matplotlib.pyplot as pyp
-import cplex
 
 import numpy as np
 

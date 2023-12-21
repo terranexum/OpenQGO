@@ -42,5 +42,7 @@ ccc_optimize.optimize(problem=ccc_problem, qgo_graph=ccc_graph)
 ccc_sol_graph: nx.DiGraph = ccc_optimize.createSolutionGraph(ccc_problem, ccc_graph)
 #print(ccc_sol_graph)
 
+nx.draw(ccc_sol_graph)
+
 # exporting both the problem and solution graphs as GeoJSONs for UI display
 exporter = QGOExporter(ccc_problem, ccc_graph, ccc_sol_graph)

@@ -1,9 +1,2 @@
 networkx
 matplotlib
-pandas
-geopandas
-numpy
-qiskit_optimization
-scikit-learn
-cplex
-qiskit
