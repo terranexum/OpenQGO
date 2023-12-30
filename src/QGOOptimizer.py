@@ -11,38 +11,26 @@ from docplex.mp.model_reader import ModelReader
 #from qiskit_optimization import QuadraticProgram
 #from qiskit_optimization.algorithms import CplexOptimizer
 from qiskit_optimization.translators import from_docplex_mp
-
-from qiskit_optimization.converters import (
-    InequalityToEquality,     # converts inequality constraints to equality constraints by adding slack variables
-    LinearEqualityToPenalty,  # converts linear equality constraints to quadratic penalty terms 
-    IntegerToBinary,          # converts integer variables to binary variables
-    QuadraticProgramToQubo    # combines the previous three converters
-)
-
 from qiskit_optimization import QuadraticProgram
 
+from qiskit_optimization.algorithms.admm_optimizer import ADMMParameters, ADMMOptimizer
 
-from qiskit_optimization.algorithms.admm_optimizer import ADMMParameters, ADMMOptimizer, ADMMOptimizationResult
 from qiskit.algorithms.minimum_eigensolvers import QAOA # NumPyMinimumEigensolver
 from qiskit.algorithms.optimizers import COBYLA
 from qiskit.primitives import Sampler
 from qiskit_optimization.algorithms import CobylaOptimizer, MinimumEigenOptimizer
 
-
-
-
 import networkx as nx
 from networkx.classes.reportviews import OutEdgeView, InEdgeView
 
-
+import Cplex
 import matplotlib.pyplot as pyp
-import cplex
 
 import numpy as np
 
 class QGOOptimizer: 
 
-    solution: ADMMOptimizationResult = None
+    solution = None
     
     def getObjectiveFunction(self, graph: nx.DiGraph, source_nodes: list[QAOANode], edge_list_names: dict[tuple[QAOANode, QAOANode], str]) -> list[float]:
     
@@ -252,9 +240,14 @@ class QGOOptimizer:
         #Accelerate these qiskit optimizers using NVIDIA's QuQuantum
 
         admm_params = ADMMParameters(rho_initial=1001, beta=1000, factor_c=900, maxiter=500, three_block=True, tol=1.0)
-        admm_quantum = ADMMOptimizer(params=admm_params, qubo_optimizer=MinimumEigenOptimizer(QAOA(sampler=Sampler(), optimizer=COBYLA())), continuous_optimizer=CobylaOptimizer())
+        admm_quantum = ADMMOptimizer(params=admm_params, qubo_optimizer=QAOA(sampler=Sampler(), optimizer=COBYLA()), continuous_optimizer=CobylaOptimizer())
 
+        #qaoa = QAOA(sampler=Sampler(), optimizer=COBYLA())
+
+
+        #self.solution = qaoa.compute_minimum_eigenvalue(qp)
         self.solution = admm_quantum.solve(qp)
+        
         return str(self.solution)
     
     def createSolutionGraph(self, problem: QGOProblem, graph: QGOGraph) -> nx.DiGraph:
@@ -319,20 +312,3 @@ class QGOOptimizer:
     
     #CONSIDER USING QML(Quantum Machine Learning) to Improve Parameters of Mixer Hamiltonian
 
-    def getMixerHamiltonian(self):
-
-        #using 2 QuBits for Mixer Hamiltonian
-        mixer = QuantumCircuit(3)
-
-        #CX is the Controlled NOT gate
-        mixer.cx(control_qubit=mixer[0], target_qubit=mixer[1], label="mixer_cx")
-
-        return mixer
-
-    def createQAOAInstance(self):
-
-        q = QAOA(optimizer=ISRES(max_evals=1000), 
-                reps=1,
-                mixer=self.getMixerHamiltonian())
-        
-        return q

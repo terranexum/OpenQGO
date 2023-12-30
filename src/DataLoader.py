@@ -226,7 +226,7 @@ class QGOFile:
                     first_encap_idx = pattern_marker[1][1]
                     second_encap_idx = pattern_marker[1][2]
 
-
+                    
                     if kvp_idx % 2 == 0:
 
                          self.fields.append(line[first_encap_idx:second_encap_idx + 1])

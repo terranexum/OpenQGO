@@ -43,7 +43,11 @@ def getEdgesAndCapacities(
     
     return edge_list, edge_capacities, edge_labels
 
+
+#this class defines a QGOProblem through nodes and edges
 class QGOProblem:
+
+    
 
     #GeoJSON Files
     files: list[gpd.GeoDataFrame] = []
@@ -75,6 +79,8 @@ class QGOProblem:
             with open(link) as f:
                 self.files.append(gpd.read_file(f))
 
+
+
     def getNodes(self, geo_file: gpd.GeoDataFrame, prefix: str, idx_cutoff=np.inf) -> list[QAOANode]:
     
         node_list: list[QAOANode] = []
@@ -84,6 +90,7 @@ class QGOProblem:
 
             if idx == idx_cutoff: break
 
+            #when we name the node, we want to format its name in a specific way
             node = QAOANode(row, f"{prefix} {idx}")
 
             node_list.append(node)
@@ -92,6 +99,8 @@ class QGOProblem:
     
     def getNodeCoordDict(self, node_list: list[QAOANode]) -> dict[QAOANode, tuple[float, float]]:
         
+
+        #this is a very useful dictionary to have as we'll often need to access node to coordinate information directly
         node_coord_dict = {}
 
         node: QAOANode
@@ -103,6 +112,7 @@ class QGOProblem:
 
     def getCoordList(self, node_list: list[QAOANode]) -> list[tuple[float, float]]:
     
+        #these are just the coordinates in each node (this could probably get replaced)
         node_coords: list[tuple[float, float]] = []
 
         for node in node_list:
@@ -112,6 +122,8 @@ class QGOProblem:
     
     def splitNodes(node_list, idx_split):
     
+        #sometimes we want a small sample case to work with to check for errors, so it's nice to split the node list
+
         new_list = node_list[:idx_split]
         del node_list[:idx_split]
 
@@ -154,6 +166,7 @@ class QGOGraph:
 
     edges_labels: list[dict[tuple[QAOANode, QAOANode], str]] = []
     
+    #directional graph for showing how nodes lead into each other
     graph: nx.DiGraph = nx.DiGraph()
 
     def __init__(self, qgo_problem: QGOProblem, thresholds: list[int]):
@@ -170,15 +183,21 @@ class QGOGraph:
     
     def getSquareMatrix(self, old_matrix: np.ndarray) -> np.ndarray:
     
+
+        #must be square matrix, cannot have different sized rows and columns
         rows, cols = old_matrix.shape
         max_dim = max(rows, cols)
 
+
+        #fill the square matrix with zeroes at the start, and then copy in our values from the old matrix
         square_mat = np.zeros((max_dim, max_dim))
         square_mat[:rows, :cols] = old_matrix
 
         return square_mat
 
     def applyThreshold(self, matrix: np.ndarray, threshold: int):
+
+        #if the matrix value is greater than some value, we deem it at insignificant and set it to 0
         matrix[matrix > threshold] = 0
     
     def setEdgeListsCapacitiesLabels(self, thresholds: list[int]):
@@ -189,12 +208,14 @@ class QGOGraph:
         for i, _ in enumerate(coords_lists):
             
             if i < len(coords_lists) - 1:
+
                 first_coords_list: tuple[float, float] = coords_lists[i]
                 second_coords_list: tuple[float, float] = coords_lists[i + 1]
                 
                 first_nodes_list: list[QAOANode] = nodes_lists[i]
                 second_nodes_list: list[QAOANode] = nodes_lists[i + 1]
                 
+                #matrix that defines distance between each node in the first coordinate list and the second coordinate list
                 dist_matrix: np.ndarray = self.getSquareMatrix(pairwise_distances(first_coords_list, second_coords_list, metric='manhattan'))
                 self.applyThreshold(dist_matrix, thresholds[i])
                 
@@ -217,15 +238,13 @@ class QGOGraph:
         edge_names = {}
         
         for i in range(len(edge_list)):
-            
+            #just a formatting function
             edge_names[edge_list[i]] = "edge" + str(i)
         
         return edge_names
     
     def setEdgeListNames(self):
-
-        self.edge_list_names = self.getEdgeNames([*self.all_edge_capacities.keys()])  
-        #print(self.edge_list_names)
+      self.edge_list_names = self.getEdgeNames([*self.all_edge_capacities.keys()])  
 
     def createGraph(self):
 
