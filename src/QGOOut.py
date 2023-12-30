@@ -8,8 +8,7 @@ import shapely
 import networkx as nx
 from networkx.classes.reportviews import NodeView, OutEdgeView
 
-from QGONexum import QGOProblem, QGOGraph
-
+from QGOProblem import QGOProblem, QGOGraph
 DATA_OUT_DIR = Path(__file__).resolve().parent.parent / "data_out"
 
 
@@ -25,8 +24,8 @@ class QGOExporter:
 
         self.outdict = {}
 
-        print("files", self.files)
-        print("prefixes", self.prefixes)
+        #print("files", self.files)
+        #print("prefixes", self.prefixes)
 
         prob_nodes = self.qgo_graph.nodes
         prob_edges = self.qgo_graph.edges
@@ -46,7 +45,7 @@ class QGOExporter:
         def retEdgeCoords(edge_item: OutEdgeView):
             edge_coord_list = []
             for node in edge_item:
-                print(node)
+                #print(node)
                 edge_coord_list.append(node.getCoordinates())
             return edge_coord_list
         
